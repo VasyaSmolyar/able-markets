@@ -36,8 +36,6 @@ export default function Candles({ ticker }) {
         return [Date.parse(candle.time), candle.o, candle.h, candle.l, candle.c];
     })
 
-    console.log(data);
-
     return (
         <Chart series={[{data: data}]} options={options} type="candlestick" height={700} width={1200}></Chart>
     )
