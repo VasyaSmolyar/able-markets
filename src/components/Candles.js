@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
+import { Container } from '@material-ui/core';
 
-export default function Candles({ ticker }) {
+export default function Candles({ stock }) {
 
     const [candles, setCandles] = useState([]);
 
     useEffect(() => {
-        fetch(`http://localhost:5000/candles/${ticker}`).then((res) => {
+        fetch(`http://localhost:5000/candles/${stock.ticker}`).then((res) => {
             return res.json()
         }).then((res) => {
             setCandles(res.candles);
         });
-    }, [ticker]);
+    }, [stock]);
 
     const options = {
           chart: {
@@ -19,7 +20,7 @@ export default function Candles({ ticker }) {
             height: 350
           },
           title: {
-            text: 'CandleStick Chart',
+            text: stock.name,
             align: 'left'
           },
           xaxis: {
@@ -37,6 +38,8 @@ export default function Candles({ ticker }) {
     })
 
     return (
-        <Chart series={[{data: data}]} options={options} type="candlestick" height={700} width={1200}></Chart>
+      <Container maxWidth="lg">
+        <Chart series={[{data: data}]} options={options} type="candlestick"></Chart>
+      </Container>
     )
 }
