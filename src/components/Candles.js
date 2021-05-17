@@ -2,6 +2,14 @@ import React, { useState, useEffect } from "react";
 import Chart from "react-apexcharts";
 import { Container } from '@material-ui/core';
 
+import { w3cwebsocket as W3CWebSocket } from "websocket";
+
+const client = new W3CWebSocket('ws://127.0.0.1:5001', 'on-update');
+
+client.onerror = function() {
+    console.log('Connection Error');
+};
+
 export default function Candles({ stock }) {
 
     const [candles, setCandles] = useState([]);
@@ -13,6 +21,27 @@ export default function Candles({ stock }) {
             setCandles(res.candles);
         });
     }, [stock]);
+
+	useEffect(() => {
+		client.onopen = function() {
+			console.log('WebSocket Client Connected');
+		
+			if (client.readyState === client.OPEN) {
+				client.send(`candles/${stock.ticker}`);
+			}
+		};
+
+		client.onmessage = function(e) {
+			if (typeof e.data === 'string') {
+				console.log("Received: '" + e.data + "'");
+				const data = JSON.parse(e.data);
+				var arr = Object.assign([], candles);
+				//arr.pop();
+				arr.push(data);
+				setCandles(arr);
+			}
+		};
+	}, [stock, candles]);
 
     const options = {
           chart: {
