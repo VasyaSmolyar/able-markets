@@ -4,7 +4,7 @@ import { Container } from '@material-ui/core';
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const client = new W3CWebSocket('ws://127.0.0.1:5001', 'on-update');
+let client = new W3CWebSocket('ws://127.0.0.1:5001', 'on-update');
 
 client.onerror = function() {
     console.log('Connection Error');
@@ -13,58 +13,57 @@ client.onerror = function() {
 export default function Candles({ stock }) {
 
     const [candles, setCandles] = useState([]);
+	const [liveCandle, setLiveCandle] = useState({});
 
     useEffect(() => {
         fetch(`http://localhost:5000/candles/${stock.ticker}`).then((res) => {
             return res.json()
         }).then((res) => {
-            setCandles(res.candles);
-        });
-    }, [stock]);
-
-	useEffect(() => {
-		client.onopen = function() {
-			console.log('WebSocket Client Connected');
-		
 			if (client.readyState === client.OPEN) {
+				setLiveCandle({});
 				client.send(`candles/${stock.ticker}`);
 			}
-		};
+			
+            setCandles(res.candles);
+        });
+		return 
+    }, [stock]);
 
-		client.onmessage = function(e) {
-			if (typeof e.data === 'string') {
-				console.log("Received: '" + e.data + "'");
-				const data = JSON.parse(e.data);
-				var arr = Object.assign([], candles);
-				//arr.pop();
-				arr.push(data);
-				setCandles(arr);
-			}
-		};
-	}, [stock, candles]);
+	
+	client.onmessage = function(e) {
+		if (typeof e.data === 'string') {
+			console.log("Received: '" + e.data + "'");
+			const data = JSON.parse(e.data);
+			setLiveCandle(data);
+		}
+	};
 
     const options = {
-          chart: {
+        chart: {
             type: 'candlestick',
             height: 350
-          },
-          title: {
+        },
+        title: {
             text: stock.name,
             align: 'left'
-          },
-          xaxis: {
+        },
+        xaxis: {
             type: 'datetime'
-          },
-          yaxis: {
+        },
+        yaxis: {
             tooltip: {
-              enabled: true
+              	enabled: true
             }
-          }
+        }
     };
 
-    const data = candles.map((candle) => {
+    let data = candles.map((candle) => {
         return [Date.parse(candle.time), candle.o, candle.h, candle.l, candle.c];
     })
+
+	if(liveCandle !== {}) {
+		data.push([Date.parse(liveCandle.time), liveCandle.o, liveCandle.h, liveCandle.l, liveCandle.c]);
+	}
 
     return (
       <Container maxWidth="lg">
