@@ -51,9 +51,9 @@ export default function SearchBar({setStock}) {
         }
     }
 
-    const options = list.map((stock) => {
+    const options = list.map((stock, id) => {
         return (
-            <MenuItem key={stock.ticker} onClick={() => {
+            <MenuItem key={stock.ticker + ' ' + id} onClick={() => {
                 setAnchorEl(null);
                 setStock(stock);
             }}>
