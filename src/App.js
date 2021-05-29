@@ -44,7 +44,7 @@ function App() {
 			<AppBar position="static">
 				<Toolbar>
 					<Typography variant="h6" className={classes.title}>
-						AbleCharts
+						AbleMarkets
 					</Typography>
 					<Button color="inherit" onClick={redirect}>Powered by Tinkoff OpenAPI</Button>
 				</Toolbar>
